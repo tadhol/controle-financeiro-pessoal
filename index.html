@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Financeiro Unificado</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; color: #333; }
+        h1, h2 { color: #1e3a8a; }
+        table { width: 100%; border-collapse: collapse; background: #fff; margin-bottom: 20px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
+        th { background-color: #f8fafc; color: #666; font-weight: 600; }
+        input[type="number"] { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .alert-box { background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; border-radius: 4px; margin-bottom: 20px; color: #991b1b; }
+    </style>
+</head>
+<body>
+
+<h1>Dashboard de Gestão Financeira</h1>
+<p>Controle unificado de curto e longo prazo (Entradas, Faturas e Custos Fixos)</p>
+
+<div class="alert-box">
+    <h2>⚠️ Alertas de Monitoramento (Google Drive)</h2>
+    <ul id="lista-alertas">
+        <li>Nenhum dado ausente detectado no momento.</li>
+    </ul>
+</div>
+
+<h2>Resumo Geral</h2>
+<table>
+    <tr>
+        <th>Métrica</th>
+        <th>Valor (R$)</th>
+        <th>Detalhes</th>
+    </tr>
+    <tr>
+        <td>Total de Entradas (Mês)</td>
+        <td id="lbl-total-entradas">R$ 0,00</td>
+        <td>Adiantamento (Dia 15) + Salário (Dia 30)</td>
+    </tr>
+    <tr>
+        <td>Total de Saídas (Cartões + Fixos)</td>
+        <td id="lbl-total-saidas">R$ 0,00</td>
+        <td>Faturas unificadas + Custos cadastrados</td>
+    </tr>
+    <tr>
+        <td>Saldo Líquido Projetado</td>
+        <td id="lbl-saldo">R$ 0,00</td>
+        <td>Resultado operacional do mês</td>
+    </tr>
+</table>
+
+<h2>Entradas e Custos</h2>
+<table>
+    <tr>
+        <th>Descrição</th>
+        <th>Vencimento / Data</th>
+        <th>Valor (R$)</th>
+    </tr>
+    <tr>
+        <td>Adiantamento Salarial</td>
+        <td>Dia 15</td>
+        <td><input type="number" id="adiantamento" value="0.00" oninput="calcular()"></td>
+    </tr>
+    <tr>
+        <td>Pagamento Mensal</td>
+        <td>Dia 30</td>
+        <td><input type="number" id="salario" value="0.00" oninput="calcular()"></td>
+    </tr>
+    <tr>
+        <td>Condomínio</td>
+        <td>Fixo Mensal</td>
+        <td><input type="number" class="fixo" value="0.00" oninput="calcular()"></td>
+    </tr>
+    <tr>
+        <td>Energia / Contas Básicas</td>
+        <td>Fixo Mensal</td>
+        <td><input type="number" class="fixo" value="0.00" oninput="calcular()"></td>
+    </tr>
+    <tr>
+        <td>Parcela Financiamento Imóvel</td>
+        <td>Fixo Mensal</td>
+        <td><input type="number" class="fixo" value="0.00" oninput="calcular()"></td>
+    </tr>
+    <tr>
+        <td>Total Cartões de Crédito (Lido do Drive)</td>
+        <td>Variável</td>
+        <td><input type="number" id="total-cartoes" value="0.00" oninput="calcular()"></td>
+    </tr>
+</table>
+
+<h2>Recomendações do Agente Financeiro</h2>
+<div id="texto-recomendacao" style="background-color: #f0f4f8; padding: 15px; border-left: 4px solid #2563eb; margin-top: 10px;">
+    Carregando análise do seu perfil... Preencha os valores acima para obter diretrizes estratégicas instantâneas.
+</div>
+
+<script>
+function calcular() {
+    let adiantamento = parseFloat(document.getElementById('adiantamento').value) || 0;
+    let salario = parseFloat(document.getElementById('salario').value) || 0;
+    let totalEntradas = adiantamento + salario;
+
+    let camposFixos = document.querySelectorAll('.fixo');
+    let totalFixos = 0;
+    camposFixos.forEach(input => {
+        totalFixos += parseFloat(input.value) || 0;
+    });
+
+    let totalCartoes = parseFloat(document.getElementById('total-cartoes').value) || 0;
+    let totalSaidas = totalFixos + totalCartoes;
+    let saldo = totalEntradas - totalSaidas;
+
+    document.getElementById('lbl-total-entradas').innerText = `R$ ${totalEntradas.toFixed(2)}`;
+    document.getElementById('lbl-total-saidas').innerText = `R$ ${totalSaidas.toFixed(2)}`;
+    document.getElementById('lbl-saldo').innerText = `R$ ${saldo.toFixed(2)}`;
+
+    let recDiv = document.getElementById('texto-recomendacao');
+    let html = "";
+
+    if (saidas > entradas) {
+        let deficit = Math.abs(saldo);
+        html += `<strong>⚠️ Alerta Crítico de Déficit:</strong> Suas saídas estão superando suas entradas em <strong>R$ ${deficit.toFixed(2)}</strong>.<br><br>`;
+        html += `<strong>Ações Corretivas Recomendadas:</strong><br>`;
+        html += `1. <strong>Contenção Imediata de Cartões:</strong> Com R$ ${totalCartoes.toFixed(2)} acumulados em faturas, o uso do crédito deve ser pausado imediatamente.<br>`;
+        html += `2. <strong>Consolidação de Dívidas:</strong> Busque uma linha de crédito com taxa menor para quitar totalmente o rotativo do cartão.<br>`;
+        html += `3. <strong>Renegociação Ativa:</strong> Entre em contato com os emissores para parcelar a fatura em condições sustentáveis.`;
+    } else {
+        html += `<strong>✅ Fluxo Equilibrado:</strong> Suas entradas cobrem as obrigações atuais, gerando um fôlego positivo de R$ ${saldo.toFixed(2)}.<br><br>`;
+        html += `<strong>Orientações de Proteção:</strong><br>`;
+        html += `• Mantenha o foco em amortizar o principal das dívidas.<br>`;
+        html += `• Cancele cartões de crédito secundários que estimulam gastos por impulso.`;
+    }
+    recDiv.innerHTML = html;
+}
+calcular();
+</script>
+
+</body>
+</html>
